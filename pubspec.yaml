@@ -1,6 +1,6 @@
 name: hydro_glass_nav_bar
 description: A beautiful, Apple-style hydro glass floating navigation bar with advanced physics-based animations, draggable indicator, and expandable FAB support for Flutter.
-version: 1.0.0-pre.1
+version: 1.0.0-pre.2
 homepage: https://github.com/kamal-ayman/hydro_glass_nav_bar
 repository: https://github.com/kamal-ayman/hydro_glass_nav_bar
 issue_tracker: https://github.com/kamal-ayman/hydro_glass_nav_bar/issues
@@ -13,10 +13,11 @@ topics:
   - widgets
   - animation
 
-# Add screenshots after creating demo.gif:
-# screenshots:
-#   - description: 'Hydro glass nav bar demo'
-#     path: screenshots/demo.gif
+screenshots:
+  - description: "Hydro Glass Nav Bar Preview"
+    path: screenshots/preview.gif
+  - description: "Hydro Glass Nav Bar Screenshot"
+    path: screenshots/image.png
 
 funding:
   - https://buymeacoffee.com/kamalayman

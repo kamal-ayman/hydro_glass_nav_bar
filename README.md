@@ -7,7 +7,11 @@
 A beautiful, **Apple-style hydro glass** floating navigation bar with advanced physics-based animations for Flutter. Create stunning, premium navigation experiences with hydro glass morphism, draggable indicators, and expandable floating action buttons.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kamal-ayman/hydro_glass_nav_bar/main/screenshots/demo.gif" alt="Demo" width="300"/>
+  <img src="https://raw.githubusercontent.com/kamal-ayman/hydro_glass_nav_bar/main/screenshots/preview.gif" alt="Preview" width="300"/>
+</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/kamal-ayman/hydro_glass_nav_bar/main/screenshots/image.png" alt="Screenshot" width="300"/>
 </p>
 
 ## ✨ Features
@@ -28,7 +32,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  hydro_glass_nav_bar: ^1.0.0-dev.3
+  hydro_glass_nav_bar: ^1.0.0-pre.1
 ```
 
 Then run:
