@@ -298,4 +298,3 @@ Created by [Kamal Ayman](https://github.com/kamal-ayman)
   <br><br>
   <a href="https://buymeacoffee.com/kamalayman"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee"></a>
 </p>
-# hydro_glass_nav_bar
