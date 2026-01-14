@@ -28,7 +28,7 @@ Add the package to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  hydro_glass_nav_bar: ^1.0.0-dev.2
+  hydro_glass_nav_bar: ^1.0.0-dev.3
 ```
 
 Then run:
