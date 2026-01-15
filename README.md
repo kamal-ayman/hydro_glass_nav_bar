@@ -257,6 +257,164 @@ final alignment = HydroGlassNavBarPhysics.computeAlignment(1, 3);
 // Returns 0.0 (center for 3 items)
 ```
 
+## 🎬 How Animations Work
+
+The hydro glass nav bar features a sophisticated multi-layered animation system that creates a premium, fluid user experience. Here's a detailed breakdown of how each animation component works:
+
+### 🎯 Draggable Indicator Animation
+
+The sliding indicator is the centerpiece of the navigation bar's animation system:
+
+#### **Physics-Based Movement**
+- Uses the **Motor** package for spring-based animations with configurable damping and stiffness
+- Two animation modes:
+  - **Interactive Spring** (`Motion.interactiveSpring`): Applied during active dragging for immediate, responsive feedback
+  - **Bouncy Spring** (`Motion.bouncySpring`): Applied when released, creating a smooth settling effect with gentle overshoot
+
+#### **Drag Interaction**
+1. **Drag Detection**: Horizontal drag gestures are captured on the navigation bar
+2. **Position Calculation**: Converts global touch position to alignment value (-1.0 to 1.0)
+3. **Real-Time Updates**: Indicator position updates continuously during drag via `VelocityMotionBuilder`
+4. **Velocity Tracking**: Drag velocity is measured and used for both physics calculations and visual effects
+
+#### **Rubber Band Resistance**
+When dragging beyond the navigation bar edges:
+- **Resistance Factor** (default: 0.4): Reduces drag speed proportionally to distance beyond bounds
+- **Max Overdrag** (default: 0.3): Limits how far the indicator can be pulled past edges
+- Creates an iOS-style "bouncy" feel that prevents disorientation
+- Formula: Overdrag is multiplied by resistance factor and clamped to maximum
+
+#### **Smart Target Selection**
+When drag is released, the target item is calculated using:
+- **Current Position**: Where the indicator currently sits
+- **Velocity**: Speed and direction of the drag motion
+- **Momentum Projection**: Velocity is projected forward 0.3 seconds to predict intended target
+- **Velocity Threshold** (0.5): Minimum speed required to trigger momentum-based selection
+- Falls back to nearest item if velocity is below threshold
+
+### 🎪 Jelly Transform Effect
+
+The indicator has a squash-and-stretch animation that makes it feel organic:
+
+#### **Velocity-Based Distortion**
+- **Speed Detection**: Monitors drag velocity magnitude
+- **Distortion Calculation**: Speed is normalized (divided by velocity scale of 10) and clamped to 0-1
+- **Squash Factor**: Horizontal compression up to 50% of distortion factor (makes it narrower)
+- **Stretch Factor**: Vertical expansion up to 30% of distortion factor (makes it taller)
+- **Matrix Transform**: Creates a `Matrix4` with diagonal scaling values
+
+#### **Animation Timing**
+- Uses `Motion.bouncySpring` with 600ms duration for smooth return to normal shape
+- Smoothly interpolates velocity back to zero after drag ends
+- Applied via `Transform` widget wrapped around the indicator
+
+### ✨ Indicator Visibility Animation
+
+The indicator has dynamic thickness based on interaction state:
+
+#### **Thickness States**
+- **Hidden** (thickness: 0.0): When not interacting and aligned with current item
+- **Visible** (thickness: 1.0): When dragging or when indicator is far from target (>0.30 alignment difference)
+- **Transition**: Animated with `Motion.snappySpring` over 300ms
+
+#### **Dual-Layer Rendering**
+1. **Background Indicator**: Simple color overlay, visible when thickness < 1
+   - Opacity animates out when thickness > 0.2
+   - Provides subtle position feedback without hydro glass overhead
+2. **Glass Indicator**: Full hydro glass effect, visible when thickness > 0
+   - Expensive rendering only when needed
+   - Includes glow effects and refraction
+
+#### **Expansion Effect**
+- Indicator expands 14 pixels beyond its normal bounds when fully visible
+- Uses `RelativeRect.lerp` to smoothly interpolate between normal and expanded state
+- Creates emphasis during interaction
+
+### 🔄 FAB Animation System
+
+The expandable Floating Action Button has several coordinated animations:
+
+#### **Appearance Animation**
+- **Trigger**: When `selectedItemsCount` > 0
+- **Scale Animation**: `SingleMotionBuilder` with `Motion.bouncySpring`
+  - Scales from 0.0 to 1.0 when appearing
+  - Anchor point: `Alignment.centerRight` for natural expansion from navbar
+- **Opacity**: Synchronized with scale for smooth fade-in
+- **IgnorePointer**: Disables touch when opacity < 0.1 to prevent ghost taps
+- **Container Width**: Animates from 0 to natural width with 400ms `Curves.easeInOutCubic`
+
+#### **Rotation Animation**
+- **Icon Rotation**: When menu expands, icon rotates 45° (0.125 turns)
+- **Duration**: 300ms with linear interpolation
+- Creates visual feedback that menu state changed
+
+#### **Options Menu Expansion**
+- **Position**: Menu appears above FAB with 8px gap
+- **Scale Animation**: Same `Motion.bouncySpring` as FAB appearance
+  - Scales from 0.0 to 1.0 from bottom-right anchor
+- **Staggered Appearance**: Each option item rendered in sequence
+- **Spacing**: 8px between each action item
+
+#### **Badge Counter Animation**
+- **Appearance**: Only shows when `selectedCount > 0` and menu not expanded
+- **Count Changes**: `AnimatedSwitcher` with `ScaleTransition`
+  - Old count scales out, new count scales in
+  - 200ms duration with `Curves.easeOutBack`
+- **Container**: Auto-sizes with min 20x20 constraint
+- **Style**: Circular badge with error color and surface border
+
+### 🎨 Navigation Item Animations
+
+Each navigation item has subtle state-based animations:
+
+#### **Selection State**
+- **Icon Scale**: Selected items scale to 1.1x (10% larger)
+- **Icon Change**: Swaps between default and selected icon (if provided)
+- **Font Weight**: Selected label uses 600 weight, unselected uses 500
+- **Color Transition**: Animated between full opacity (selected) and 60% opacity (unselected)
+- **Duration**: All transitions are 150ms for snappy response
+
+#### **Performance Optimization**
+- Each item wrapped in `RepaintBoundary` to isolate repaints
+- Prevents animation overhead from affecting other items
+
+### 🌊 Hydro Glass Visual Effects
+
+The glass morphism effect is purely visual and doesn't animate, but works with the animations:
+
+#### **Settings**
+- **Refraction Index**: 1.21 (simulates glass-like light bending)
+- **Thickness**: 30 (virtual glass thickness)
+- **Blur**: 8 (background blur radius)
+- **Saturation**: 1.5 (enhanced colors through glass)
+- **Light Intensity**: 0.7 (dark mode) or 1.0 (light mode)
+- **Ambient Strength**: 0.2 (dark) or 0.5 (light)
+
+#### **Rendering**
+- Uses `liquid_glass_renderer` package for GPU-accelerated effects
+- `LiquidGlassBlendGroup` with blend factor 15.0 merges effects smoothly
+- All animated elements render **inside** the glass layer for cohesive effect
+
+### ⚡ Performance Characteristics
+
+#### **Optimization Strategies**
+1. **Conditional Rendering**: Glass effects only render when visible
+2. **RepaintBoundary**: Isolates frequently updating elements
+3. **IgnorePointer**: Disables invisible elements from hit testing
+4. **Visibility Widget**: Removes collapsed elements from render tree
+5. **Spring Animations**: Use native interpolation, no manual frame calculations
+
+#### **Animation Hierarchy**
+```
+VelocityMotionBuilder (tracks drag velocity)
+  └─ SingleMotionBuilder (controls indicator thickness)
+      ├─ Transform (applies jelly distortion)
+      └─ SingleMotionBuilder (animates FAB visibility)
+          └─ SingleMotionBuilder (animates menu expansion)
+```
+
+All animations run at 60 FPS (or 120 FPS on ProMotion displays) with automatic frame rate adaptation.
+
 ## 📱 Requirements
 
 - Flutter SDK: `>=3.24.0`
