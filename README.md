@@ -288,7 +288,7 @@ When dragging beyond the navigation bar edges:
 When drag is released, the target item is calculated using:
 - **Current Position**: Where the indicator currently sits
 - **Velocity**: Speed and direction of the drag motion
-- **Momentum Projection**: Velocity is projected forward 300ms (0.3 seconds) to predict intended target
+- **Momentum Projection**: Velocity is projected forward 300ms to predict intended target
 - **Velocity Threshold** (0.5): Minimum speed required to trigger momentum-based selection
 - Falls back to nearest item if velocity is below threshold
 
@@ -341,7 +341,7 @@ The expandable Floating Action Button has several coordinated animations:
   - Anchor point: `Alignment.centerRight` for natural expansion from navbar
 - **Opacity**: Synchronized with scale for smooth fade-in
 - **IgnorePointer**: Disables touch when opacity < 0.1 to prevent ghost taps
-- **Container Width**: Animates from 0 to natural width with 400ms `Curves.easeInOutCubic`
+- **Container Width**: Animates from 0 to natural width with 400ms duration using `Curves.easeInOutCubic`
 
 #### **Rotation Animation**
 - **Icon Rotation**: When menu expands, icon rotates 45° (0.125 turns)
