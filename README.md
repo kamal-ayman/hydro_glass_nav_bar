@@ -266,7 +266,7 @@ The hydro glass nav bar features a sophisticated multi-layered animation system 
 The sliding indicator is the centerpiece of the navigation bar's animation system:
 
 #### **Physics-Based Movement**
-- Uses the **motor** package for spring-based animations with configurable damping and stiffness
+- Uses the `motor` package for spring-based animations with configurable damping and stiffness
 - Two animation modes:
   - **Interactive Spring** (`Motion.interactiveSpring`): Applied during active dragging for immediate, responsive feedback
   - **Bouncy Spring** (`Motion.bouncySpring`): Applied when released, creating a smooth settling effect with gentle overshoot
@@ -405,7 +405,7 @@ The glass morphism effect is purely visual and doesn't animate, but works with t
 5. **Spring Animations**: Use native interpolation, no manual frame calculations
 
 #### **Animation Hierarchy**
-```
+```text
 VelocityMotionBuilder (tracks drag velocity)
   └─ SingleMotionBuilder (controls indicator thickness)
       ├─ Transform (applies jelly distortion)
