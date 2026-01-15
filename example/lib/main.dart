@@ -46,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final ValueNotifier<int> _selectedCount = ValueNotifier(0);
+  LiquidGlassVariant _variant = LiquidGlassVariant.regular;
+  GlassSizeCategory _sizeCategory = GlassSizeCategory.medium;
 
   static const _items = [
     HydroGlassNavItem(
@@ -86,6 +88,45 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Hydro Glass Nav Bar'),
+        actions: [
+          PopupMenuButton<LiquidGlassVariant>(
+            tooltip: 'Glass Variant',
+            icon: const Icon(Icons.style),
+            onSelected: (variant) => setState(() => _variant = variant),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: LiquidGlassVariant.regular,
+                child: Text('Regular Glass'),
+              ),
+              const PopupMenuItem(
+                value: LiquidGlassVariant.clear,
+                child: Text('Clear Glass'),
+              ),
+            ],
+          ),
+          PopupMenuButton<GlassSizeCategory>(
+            tooltip: 'Size Category',
+            icon: const Icon(Icons.format_size),
+            onSelected: (size) => setState(() => _sizeCategory = size),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: GlassSizeCategory.small,
+                child: Text('Small'),
+              ),
+              const PopupMenuItem(
+                value: GlassSizeCategory.medium,
+                child: Text('Medium'),
+              ),
+              const PopupMenuItem(
+                value: GlassSizeCategory.large,
+                child: Text('Large'),
+              ),
+            ],
+          ),
+        ],
+      ),
       body: Stack(
         children: [
           // Background content
@@ -123,6 +164,8 @@ class _HomeScreenState extends State<HomeScreen>
           HydroGlassNavBar(
             controller: _tabController,
             items: _items,
+            variant: _variant,
+            sizeCategory: _sizeCategory,
             selectedItemsCount: _selectedCount,
             fabConfig: HydroGlassNavBarFABConfig(
               icon: Icons.more_vert,

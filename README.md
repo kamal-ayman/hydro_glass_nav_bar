@@ -16,15 +16,19 @@ A beautiful, **Apple-style hydro glass** floating navigation bar with advanced p
 
 ## ✨ Features
 
-- 🌊 **Hydro Glass Morphism** - Stunning visual effect with refraction, blur, and glass glow
+### Core iOS 26 Liquid Glass Implementation
+
+- 🌊 **Advanced Liquid Glass Morphism** - Multi-layer rendering with refraction, blur, saturation boost, and specular highlights
+- 🎨 **Glass Variants** - Regular (adaptive) and Clear (transparent) glass styles following iOS 26 specification
+- 📐 **Size-Based Adaptation** - Material thickness automatically adjusts for small, medium, and large elements
+- 🔆 **Background Brightness Detection** - Automatic light/dark style switching based on content beneath glass
+- ♿ **Full Accessibility Support** - Reduce Transparency, Increase Contrast, and Reduce Motion modes
 - 🎯 **Draggable Indicator** - Swipe between items with smooth, physics-based animations
-- 🧲 **iOS-style Physics** - Rubber band resistance and jelly transform effects
+- 🧲 **iOS-style Physics** - Rubber band resistance and jelly transform effects using Motor package
 - ➕ **Expandable FAB** - Optional floating action button with action menu
-- 🎨 **Theme Adaptive** - Automatic dark/light mode support
-- ♿ **Accessible** - Full semantic label support for screen readers
 - 📳 **Haptic Feedback** - Tactile response on interactions
-- ⚡ **Performance Optimized** - RepaintBoundary and efficient rendering
-- 🎭 **Fallback Mode** - Works without hydro glass effect for older devices
+- ⚡ **Performance Optimized** - RepaintBoundary isolation and efficient GPU-accelerated rendering
+- 🎭 **Fallback Mode** - Graceful degradation without liquid glass effect
 
 ## 📦 Installation
 
@@ -109,6 +113,84 @@ class _MyHomePageState extends State<MyHomePage>
 }
 ```
 
+## 🎨 iOS 26 Liquid Glass Features
+
+### Glass Variants
+
+Choose between Regular (fully adaptive) and Clear (transparent) glass styles:
+
+```dart
+HydroGlassNavBar(
+  controller: _tabController,
+  items: [...],
+  variant: LiquidGlassVariant.regular, // or LiquidGlassVariant.clear
+)
+```
+
+**Regular Glass** (Default):
+- Fully adaptive to any background
+- Automatic light/dark style switching
+- Guaranteed legibility in all situations
+- Best for navigation bars, toolbars, and controls
+
+**Clear Glass**:
+- More transparent, shows richer background content
+- Maintains consistent appearance (no automatic flipping)
+- Requires bold, high-contrast content on glass
+- **Use only** over media-rich content (photos, videos, artwork)
+- Best for media player controls, photo gallery overlays
+
+### Size-Based Material Thickness
+
+Glass automatically adapts its optical properties based on element size:
+
+```dart
+HydroGlassNavBar(
+  controller: _tabController,
+  items: [...],
+  sizeCategory: GlassSizeCategory.medium, // small, medium, or large
+)
+```
+
+- **Small**: Light refraction (1.21), light blur (7px) - feels lightweight and responsive
+- **Medium**: Standard refraction (1.35), standard blur (9px) - balanced appearance  
+- **Large**: Strong refraction (1.5), heavy blur (12px) - substantial and grounded
+
+The package automatically adjusts blur radius, refractive index, saturation, and lighting based on size.
+
+### Background Brightness Detection
+
+For Regular glass variant, the nav bar automatically detects background brightness and adjusts its style:
+
+- **Over bright backgrounds**: Uses dark glass style (dark tint, visible icons)
+- **Over dark backgrounds**: Uses light glass style (light tint, bright icons)
+
+This ensures optimal contrast and legibility without manual intervention.
+
+### Accessibility Support
+
+Full support for iOS accessibility features:
+
+**Reduce Transparency Mode**:
+- Glass becomes frostier (more opaque)
+- Blur intensity doubles for better legibility
+- Background content is significantly obscured
+- Automatically detected via `MediaQuery`
+
+**Increase Contrast Mode**:
+- Glass becomes predominantly black or white
+- Adds high-contrast borders
+- Simplifies visual effects
+- Maximum differentiation between UI layers
+
+**Reduce Motion Mode**:
+- Disables elastic/jelly deformations
+- Replaces spring animations with simple easeOut curves
+- Shortens animation durations by 50%
+- Maintains functional animations, removes decorative motion
+
+All accessibility modes are detected automatically and require no configuration.
+
 ## 📖 Components
 
 ### HydroGlassNavBar
@@ -119,6 +201,8 @@ The main widget that creates the floating navigation bar.
 |-----------|------|---------|-------------|
 | `controller` | `TabController` | **Required** | Controls item selection |
 | `items` | `List<HydroGlassNavItem>` | **Required** | List of 2-5 items |
+| `variant` | `LiquidGlassVariant` | `regular` | Glass style: regular or clear |
+| `sizeCategory` | `GlassSizeCategory` | `medium` | Size-based material thickness |
 | `fabConfig` | `HydroGlassNavBarFABConfig?` | `null` | Optional FAB configuration |
 | `showIndicator` | `bool` | `true` | Whether to show the sliding indicator |
 | `indicatorColor` | `Color?` | `null` | Custom indicator color |
@@ -234,7 +318,9 @@ HydroGlassNavBar(
 )
 ```
 
-## 🧪 Physics Utilities
+## 🧪 Utilities & Advanced Usage
+
+### Physics Utilities
 
 The package exposes `HydroGlassNavBarPhysics` for custom implementations:
 
@@ -257,6 +343,90 @@ final alignment = HydroGlassNavBarPhysics.computeAlignment(1, 3);
 // Returns 0.0 (center for 3 items)
 ```
 
+### Background Brightness Detection
+
+Use `BackgroundBrightnessDetector` for custom glass implementations:
+
+```dart
+// Calculate perceived luminance (0.0 = black, 1.0 = white)
+final luminance = BackgroundBrightnessDetector.calculateLuminance(
+  Theme.of(context).scaffoldBackgroundColor,
+);
+
+// Determine if background is bright
+final isBright = BackgroundBrightnessDetector.isBrightBackground(
+  backgroundColor,
+  threshold: 0.5, // Customizable threshold
+);
+
+// Get recommended glass style
+final glassStyle = BackgroundBrightnessDetector.getGlassStyle(
+  backgroundColor,
+);
+
+// Get adaptive tint color
+final tintColor = BackgroundBrightnessDetector.getAdaptiveTint(
+  backgroundColor,
+  baseOpacity: 0.1,
+);
+```
+
+### Size-Based Configuration
+
+Access size-based glass configurations programmatically:
+
+```dart
+// Get configuration for specific size
+final smallConfig = GlassSizeConfiguration.forCategory(
+  GlassSizeCategory.small,
+  isDark: Theme.of(context).brightness == Brightness.dark,
+);
+
+print(smallConfig.refractiveIndex); // 1.21
+print(smallConfig.blur); // 7.0
+print(smallConfig.thickness); // 25.0
+
+// Create custom configuration
+const customConfig = GlassSizeConfiguration(
+  refractiveIndex: 1.4,
+  blur: 10,
+  thickness: 35,
+  saturation: 1.3,
+  lightIntensity: 0.8,
+  ambientStrength: 0.4,
+);
+```
+
+### Accessibility Detection
+
+Detect and respond to accessibility settings:
+
+```dart
+// Detect system accessibility preferences
+final settings = AccessibilityGlassSettings.fromMediaQuery(
+  MediaQuery.of(context),
+);
+
+if (settings.reduceMotion) {
+  // Use simple animations
+}
+
+if (settings.reduceTransparency) {
+  // Increase glass opacity
+}
+
+// Get adjusted animation duration
+final duration = AccessibilityGlassAdapter.getAnimationDuration(
+  const Duration(milliseconds: 400),
+  settings.reduceMotion,
+);
+
+// Get adjusted animation curve
+final curve = AccessibilityGlassAdapter.getAnimationCurve(
+  settings.reduceMotion,
+);
+```
+
 ## 📱 Requirements
 
 - Flutter SDK: `>=3.24.0`
@@ -264,8 +434,28 @@ final alignment = HydroGlassNavBarPhysics.computeAlignment(1, 3);
 
 ## 📄 Dependencies
 
-- [liquid_glass_renderer](https://pub.dev/packages/liquid_glass_renderer) - For the hydro glass morphism effect
-- [motor](https://pub.dev/packages/motor) - For physics-based spring animations
+This package implements the iOS 26 Liquid Glass specification using:
+
+- [liquid_glass_renderer](https://pub.dev/packages/liquid_glass_renderer) ^0.2.0-dev.4 - GPU-accelerated glass morphism rendering with multi-layer optical effects
+- [motor](https://pub.dev/packages/motor) ^1.1.0 - Physics-based spring animations for organic, natural motion
+
+## 🏗️ Architecture
+
+The package follows clean architecture principles with clear separation of concerns:
+
+- **Presentation Layer**: Widgets (`HydroGlassNavBar`, indicators, items, FAB)
+- **Domain Layer**: Configuration models (`LiquidGlassVariant`, `GlassSizeCategory`, `AccessibilityGlassSettings`)
+- **Utilities**: Pure functions for physics, brightness detection, and accessibility adaptation
+- **Strategy Pattern**: Variant selection and size-based adaptation
+- **Factory Pattern**: Configuration generation based on size and theme
+- **Observer Pattern**: Reactive state management with ValueNotifier
+
+### Design Principles
+
+- **SOLID Principles**: Single responsibility, open/closed, dependency inversion
+- **Performance**: RepaintBoundary isolation, conditional rendering, GPU acceleration
+- **Accessibility-First**: Full support for system accessibility preferences
+- **Testability**: Pure functions, dependency injection, comprehensive test coverage
 
 ## 🤝 Contributing
 

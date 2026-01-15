@@ -50,6 +50,8 @@ final class HydroGlassNavBar extends StatefulWidget {
     this.selectedItemsCount,
     this.padding = const EdgeInsets.fromLTRB(20, 20, 20, 20),
     this.useLiquidGlass = true,
+    this.variant = LiquidGlassVariant.regular,
+    this.sizeCategory = GlassSizeCategory.medium,
     super.key,
   }) : assert(items.length >= 2 && items.length <= 5, 'Items must be 2-5');
 
@@ -100,6 +102,28 @@ final class HydroGlassNavBar extends StatefulWidget {
   /// Defaults to `true`.
   final bool useLiquidGlass;
 
+  /// The style variant of the liquid glass effect.
+  ///
+  /// Determines the visual properties and behavior of the glass material:
+  /// - [LiquidGlassVariant.regular]: Fully adaptive, works over any content
+  /// - [LiquidGlassVariant.clear]: More transparent, requires content dimming
+  ///
+  /// See [LiquidGlassVariant] documentation for detailed usage guidelines.
+  ///
+  /// Defaults to [LiquidGlassVariant.regular].
+  final LiquidGlassVariant variant;
+
+  /// The size category determining material thickness and optical properties.
+  ///
+  /// Glass appearance adapts based on size to create appropriate visual
+  /// weight and hierarchy:
+  /// - [GlassSizeCategory.small]: Light, responsive (buttons, items)
+  /// - [GlassSizeCategory.medium]: Standard thickness (toolbars, nav bars)
+  /// - [GlassSizeCategory.large]: Substantial, grounded (menus, sheets)
+  ///
+  /// Defaults to [GlassSizeCategory.medium].
+  final GlassSizeCategory sizeCategory;
+
   @override
   State<HydroGlassNavBar> createState() => _HydroGlassNavBarState();
 }
@@ -149,6 +173,23 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
     final colorScheme = Theme.of(context).colorScheme;
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
+    final mediaQuery = MediaQuery.of(context);
+
+    // Detect accessibility settings
+    final accessibilitySettings =
+        AccessibilityGlassSettings.fromMediaQuery(mediaQuery);
+
+    // Get size-based configuration
+    final sizeConfig = GlassSizeConfiguration.forCategory(
+      widget.sizeCategory,
+      isDark: isDark,
+    );
+
+    // Determine adaptive glass style based on background
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final adaptiveStyle = widget.variant == LiquidGlassVariant.regular
+        ? BackgroundBrightnessDetector.getGlassStyle(backgroundColor)
+        : brightness; // Clear glass doesn't adapt
 
     final Widget content = SafeArea(
       top: false,
@@ -160,8 +201,13 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
             // Main nav bar with draggable indicator
             Expanded(
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOutCubic,
+                duration: AccessibilityGlassAdapter.getAnimationDuration(
+                  const Duration(milliseconds: 300),
+                  accessibilitySettings.reduceMotion,
+                ),
+                curve: AccessibilityGlassAdapter.getAnimationCurve(
+                  accessibilitySettings.reduceMotion,
+                ),
                 child: _HydroGlassNavIndicator(
                   visible: widget.showIndicator,
                   currentIndex: widget.controller.index,
@@ -196,8 +242,13 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
 
             // Animated spacing for FAB
             AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOutCubic,
+              duration: AccessibilityGlassAdapter.getAnimationDuration(
+                const Duration(milliseconds: 300),
+                accessibilitySettings.reduceMotion,
+              ),
+              curve: AccessibilityGlassAdapter.getAnimationCurve(
+                accessibilitySettings.reduceMotion,
+              ),
               width: _hasSelection ? 8 : 0,
             ),
 
@@ -212,16 +263,49 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
       return Positioned(left: 0, right: 0, bottom: 0, child: content);
     }
 
-    final glassSettings = LiquidGlassSettings(
-      refractiveIndex: 1.21,
-      thickness: 30,
-      blur: 8,
-      saturation: 1.5,
-      lightIntensity: isDark ? .7 : 1,
-      ambientStrength: isDark ? .2 : .5,
+    // Build base glass settings from size configuration
+    var glassSettings = LiquidGlassSettings(
+      refractiveIndex: sizeConfig.refractiveIndex,
+      thickness: sizeConfig.thickness,
+      blur: sizeConfig.blur,
+      saturation: sizeConfig.saturation,
+      lightIntensity: sizeConfig.lightIntensity,
+      ambientStrength: sizeConfig.ambientStrength,
       lightAngle: 3.14159 / 4,
       glassColor: colorScheme.surface.withValues(alpha: 0.6),
     );
+
+    // Apply variant-specific adjustments
+    if (widget.variant == LiquidGlassVariant.clear) {
+      // Clear glass is more transparent with consistent appearance
+      glassSettings = LiquidGlassSettings(
+        refractiveIndex: glassSettings.refractiveIndex * 1.1,
+        thickness: glassSettings.thickness,
+        blur: glassSettings.blur * 0.8, // Less blur
+        saturation: glassSettings.saturation * 1.1,
+        lightIntensity: glassSettings.lightIntensity,
+        ambientStrength: glassSettings.ambientStrength,
+        lightAngle: glassSettings.lightAngle,
+        glassColor: glassSettings.glassColor.withOpacity(
+          glassSettings.glassColor.opacity * 0.5, // More transparent
+        ),
+      );
+    }
+
+    // Apply accessibility adjustments
+    final baseGlassColor = glassSettings.glassColor;
+    if (accessibilitySettings.reduceTransparency) {
+      glassSettings = AccessibilityGlassAdapter.reduceTransparency(
+        glassSettings,
+        baseGlassColor,
+      );
+    } else if (accessibilitySettings.increaseContrast) {
+      glassSettings = AccessibilityGlassAdapter.increaseContrast(
+        glassSettings,
+        baseGlassColor,
+        isDark,
+      );
+    }
 
     return Positioned(
       left: 0,
@@ -241,12 +325,23 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
   }
 
   Widget _buildFAB(ColorScheme colorScheme) {
+    final mediaQuery = MediaQuery.of(context);
+    final accessibilitySettings =
+        AccessibilityGlassSettings.fromMediaQuery(mediaQuery);
+
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOutCubic,
+      duration: AccessibilityGlassAdapter.getAnimationDuration(
+        const Duration(milliseconds: 400),
+        accessibilitySettings.reduceMotion,
+      ),
+      curve: AccessibilityGlassAdapter.getAnimationCurve(
+        accessibilitySettings.reduceMotion,
+      ),
       width: _hasSelection ? null : 0,
       child: SingleMotionBuilder(
-        motion: const Motion.bouncySpring(),
+        motion: accessibilitySettings.reduceMotion
+            ? const Motion.snappySpring() // Simpler motion for accessibility
+            : const Motion.bouncySpring(),
         value: _hasSelection ? 1.0 : 0.0,
         builder: (context, value, child) {
           final clampedValue = value.clamp(0.0, 1.0);
