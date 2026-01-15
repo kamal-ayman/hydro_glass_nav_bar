@@ -266,7 +266,7 @@ The hydro glass nav bar features a sophisticated multi-layered animation system 
 The sliding indicator is the centerpiece of the navigation bar's animation system:
 
 #### **Physics-Based Movement**
-- Uses the **Motor** package for spring-based animations with configurable damping and stiffness
+- Uses the **motor** package for spring-based animations with configurable damping and stiffness
 - Two animation modes:
   - **Interactive Spring** (`Motion.interactiveSpring`): Applied during active dragging for immediate, responsive feedback
   - **Bouncy Spring** (`Motion.bouncySpring`): Applied when released, creating a smooth settling effect with gentle overshoot
@@ -288,7 +288,7 @@ When dragging beyond the navigation bar edges:
 When drag is released, the target item is calculated using:
 - **Current Position**: Where the indicator currently sits
 - **Velocity**: Speed and direction of the drag motion
-- **Momentum Projection**: Velocity is projected forward 0.3 seconds to predict intended target
+- **Momentum Projection**: Velocity is projected forward 300ms (0.3 seconds) to predict intended target
 - **Velocity Threshold** (0.5): Minimum speed required to trigger momentum-based selection
 - Falls back to nearest item if velocity is below threshold
 
