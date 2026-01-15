@@ -111,6 +111,9 @@ class AccessibilityGlassAdapter {
     LiquidGlassSettings settings,
     Color glassColor,
   ) {
+    // iOS accessibility guidelines suggest 4x opacity increase
+    const opacityMultiplier = 4.0;
+
     return LiquidGlassSettings(
       refractiveIndex: settings.refractiveIndex * 0.7, // Reduce distortion
       thickness: settings.thickness,
@@ -119,8 +122,8 @@ class AccessibilityGlassAdapter {
       lightIntensity: settings.lightIntensity * 0.8,
       ambientStrength: settings.ambientStrength * 0.6,
       lightAngle: settings.lightAngle,
-      glassColor: glassColor.withValues(
-        alpha: (glassColor.a * 255 * 4).clamp(0, 255) / 255, // Increase opacity
+      glassColor: glassColor.withOpacity(
+        (glassColor.opacity * opacityMultiplier).clamp(0.0, 1.0),
       ),
     );
   }

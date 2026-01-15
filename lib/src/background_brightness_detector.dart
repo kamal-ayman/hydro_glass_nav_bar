@@ -134,10 +134,10 @@ class BackgroundBrightnessDetector {
 
     if (isBright) {
       // Dark tint over bright backgrounds
-      return Colors.black.withValues(alpha: baseOpacity);
+      return Colors.black.withOpacity(baseOpacity);
     } else {
       // Light tint over dark backgrounds
-      return Colors.white.withValues(alpha: baseOpacity);
+      return Colors.white.withOpacity(baseOpacity);
     }
   }
 

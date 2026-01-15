@@ -104,6 +104,26 @@ class GlassSizeConfiguration {
     required this.ambientStrength,
   });
 
+  // iOS 26 specification constants for light intensity in light mode
+  static const double _smallLightIntensityLight = 0.9;
+  static const double _mediumLightIntensityLight = 1.0;
+  static const double _largeLightIntensityLight = 1.2;
+
+  // iOS 26 specification constants for light intensity in dark mode
+  static const double _smallLightIntensityDark = 0.6;
+  static const double _mediumLightIntensityDark = 0.7;
+  static const double _largeLightIntensityDark = 0.85;
+
+  // iOS 26 specification constants for ambient strength in light mode
+  static const double _smallAmbientStrengthLight = 0.4;
+  static const double _mediumAmbientStrengthLight = 0.5;
+  static const double _largeAmbientStrengthLight = 0.6;
+
+  // iOS 26 specification constants for ambient strength in dark mode
+  static const double _smallAmbientStrengthDark = 0.15;
+  static const double _mediumAmbientStrengthDark = 0.2;
+  static const double _largeAmbientStrengthDark = 0.3;
+
   /// Creates configuration for a specific size category.
   ///
   /// This factory applies the iOS 26 specification's recommended values
@@ -119,8 +139,12 @@ class GlassSizeConfiguration {
           blur: 7,
           thickness: 25,
           saturation: 1.4,
-          lightIntensity: isDark ? 0.6 : 0.9,
-          ambientStrength: isDark ? 0.15 : 0.4,
+          lightIntensity: isDark
+              ? _smallLightIntensityDark
+              : _smallLightIntensityLight,
+          ambientStrength: isDark
+              ? _smallAmbientStrengthDark
+              : _smallAmbientStrengthLight,
         );
       case GlassSizeCategory.medium:
         return GlassSizeConfiguration(
@@ -128,8 +152,12 @@ class GlassSizeConfiguration {
           blur: 9,
           thickness: 30,
           saturation: 1.5,
-          lightIntensity: isDark ? 0.7 : 1.0,
-          ambientStrength: isDark ? 0.2 : 0.5,
+          lightIntensity: isDark
+              ? _mediumLightIntensityDark
+              : _mediumLightIntensityLight,
+          ambientStrength: isDark
+              ? _mediumAmbientStrengthDark
+              : _mediumAmbientStrengthLight,
         );
       case GlassSizeCategory.large:
         return GlassSizeConfiguration(
@@ -137,8 +165,12 @@ class GlassSizeConfiguration {
           blur: 12,
           thickness: 40,
           saturation: 1.6,
-          lightIntensity: isDark ? 0.85 : 1.2,
-          ambientStrength: isDark ? 0.3 : 0.6,
+          lightIntensity: isDark
+              ? _largeLightIntensityDark
+              : _largeLightIntensityLight,
+          ambientStrength: isDark
+              ? _largeAmbientStrengthDark
+              : _largeAmbientStrengthLight,
         );
     }
   }

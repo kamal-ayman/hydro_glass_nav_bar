@@ -286,8 +286,8 @@ class _HydroGlassNavBarState extends State<HydroGlassNavBar> {
         lightIntensity: glassSettings.lightIntensity,
         ambientStrength: glassSettings.ambientStrength,
         lightAngle: glassSettings.lightAngle,
-        glassColor: glassSettings.glassColor.withValues(
-          alpha: glassSettings.glassColor.a * 255 * 0.5 / 255, // More transparent
+        glassColor: glassSettings.glassColor.withOpacity(
+          glassSettings.glassColor.opacity * 0.5, // More transparent
         ),
       );
     }
